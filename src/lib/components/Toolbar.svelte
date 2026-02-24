@@ -31,8 +31,8 @@
 </script>
 
 <div class="toolbar no-print">
-	<div class="toolbar-group">
-		<label class="toolbar-label">Theme</label>
+	<label class="toolbar-group">
+		<span class="toolbar-label">Theme</span>
 		<select
 			value={theme}
 			onchange={(e) => onthemechange((e.target as HTMLSelectElement).value as ThemeName)}
@@ -41,10 +41,10 @@
 				<option value={t.name}>{t.label}</option>
 			{/each}
 		</select>
-	</div>
+	</label>
 
-	<div class="toolbar-group">
-		<label class="toolbar-label">Pages</label>
+	<label class="toolbar-group">
+		<span class="toolbar-label">Pages</span>
 		<select
 			value={maxPages}
 			onchange={(e) => onpageschange(Number((e.target as HTMLSelectElement).value))}
@@ -52,10 +52,10 @@
 			<option value={1}>1 page</option>
 			<option value={2}>2 pages</option>
 		</select>
-	</div>
+	</label>
 
-	<div class="toolbar-group">
-		<label class="toolbar-label">Orientation</label>
+	<label class="toolbar-group">
+		<span class="toolbar-label">Orientation</span>
 		<select
 			value={orientation}
 			onchange={(e) =>
@@ -66,10 +66,10 @@
 			<option value="portrait">Portrait</option>
 			<option value="landscape">Landscape</option>
 		</select>
-	</div>
+	</label>
 
-	<div class="toolbar-group">
-		<label class="toolbar-label">Paper</label>
+	<label class="toolbar-group">
+		<span class="toolbar-label">Paper</span>
 		<select
 			value={paperSize}
 			onchange={(e) =>
@@ -78,10 +78,10 @@
 			<option value="letter">Letter</option>
 			<option value="a4">A4</option>
 		</select>
-	</div>
+	</label>
 
-	<div class="toolbar-group">
-		<label class="toolbar-label">Font Size</label>
+	<label class="toolbar-group">
+		<span class="toolbar-label">Font Size</span>
 		<select
 			value={fontSizeOverride}
 			onchange={(e) => onfontsizechange((e.target as HTMLSelectElement).value)}
@@ -91,7 +91,7 @@
 			<option value="medium">Medium</option>
 			<option value="large">Large</option>
 		</select>
-	</div>
+	</label>
 
 	<button class="print-button" onclick={onprint}> Print </button>
 </div>
