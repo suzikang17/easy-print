@@ -5,11 +5,19 @@
 		html: string;
 		layout: LayoutResult;
 		theme: string;
+		onmeasure?: (height: number) => void;
 	}
 
-	let { html, layout, theme }: Props = $props();
+	let { html, layout, theme, onmeasure }: Props = $props();
 
-	let pageEl: HTMLDivElement | undefined = $state();
+	let contentEl: HTMLDivElement | undefined = $state();
+
+	$effect(() => {
+		if (contentEl && onmeasure && html) {
+			// Measure at default single-column, default font size to get raw content height
+			onmeasure(contentEl.scrollHeight);
+		}
+	});
 
 	const pageStyle = $derived(
 		`width: ${layout.pageWidth}px; min-height: ${layout.pageHeight}px; padding: ${layout.marginPx}px; font-size: ${layout.fontSize}px;`
@@ -18,8 +26,8 @@
 	const columnsClass = $derived(layout.columns > 1 ? `columns-${layout.columns}` : '');
 </script>
 
-<div class="page {theme}" style={pageStyle} bind:this={pageEl}>
-	<div class="page-content {columnsClass}">
+<div class="page {theme}" style={pageStyle}>
+	<div class="page-content {columnsClass}" bind:this={contentEl}>
 		{@html html}
 	</div>
 </div>

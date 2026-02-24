@@ -29,14 +29,7 @@
 		return null;
 	});
 
-	// Estimate based on character count and line count as a starting heuristic.
-	// Task 9 will add real DOM measurement.
-	let estimatedHeight = $derived.by(() => {
-		if (!content.trim()) return 0;
-		const lines = content.split('\n').length;
-		const avgLineHeight = 22;
-		return lines * avgLineHeight;
-	});
+	let measuredHeight = $state(0);
 
 	let layoutConfig = $derived<LayoutConfig>({
 		pageWidth: pageDimensions.w,
@@ -46,7 +39,7 @@
 		fontSizeOverride: fontSizeValue,
 	});
 
-	let layout = $derived(computeLayout(estimatedHeight, layoutConfig));
+	let layout = $derived(computeLayout(measuredHeight, layoutConfig));
 
 	let themeClass = $derived(themes.find((t) => t.name === theme)?.cssClass ?? 'theme-modern');
 
@@ -82,7 +75,7 @@
 		<div class="preview-pane">
 			<div class="preview-scroll">
 				{#if html}
-					<PagePreview {html} {layout} theme={themeClass} />
+					<PagePreview {html} {layout} theme={themeClass} onmeasure={(h) => (measuredHeight = h)} />
 				{:else}
 					<div class="empty-state">
 						<p>Type or paste content on the left to see a live preview.</p>
