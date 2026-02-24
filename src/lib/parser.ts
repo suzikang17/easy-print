@@ -7,7 +7,7 @@ import { marked } from 'marked';
 export function parseContent(input: string): string {
 	if (!input.trim()) return '';
 
-	const rawHtml = marked.parse(input, { async: false }) as string;
+	const rawHtml = marked.parse(input, { async: false, breaks: true }) as string;
 
 	// Split HTML at h1/h2 boundaries and wrap each in a section div
 	const sections = rawHtml.split(/(?=<h[12][\s>])/);

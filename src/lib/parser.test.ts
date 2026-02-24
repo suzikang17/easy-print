@@ -32,6 +32,11 @@ describe('parseContent', () => {
 		expect(sectionCount).toBe(2);
 	});
 
+	it('preserves single line breaks as <br>', () => {
+		const result = parseContent('line one\nline two\nline three');
+		expect(result).toContain('<br');
+	});
+
 	it('returns empty string for empty input', () => {
 		expect(parseContent('')).toBe('');
 	});
