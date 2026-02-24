@@ -1,0 +1,22 @@
+.theme-modern {
+	--font-body: 'Inter', system-ui, sans-serif;
+	--font-heading: 'Inter', system-ui, sans-serif;
+	--font-size-base: 14px;
+	--font-size-h1: 22px;
+	--font-size-h2: 18px;
+	--line-height: 1.4;
+	--section-gap: 12px;
+	--heading-margin: 8px 0 4px;
+	--list-padding: 20px;
+	--hr-style: 2px solid #e2e8f0;
+	--text-color: #1a202c;
+	--bg-color: #fff;
+	--accent-color: #3b82f6;
+	--border-style: 1px solid #e2e8f0;
+}
+
+.theme-modern .section {
+	border-left: 3px solid var(--accent-color);
+	padding-left: 12px;
+	margin-bottom: var(--section-gap);
+}
