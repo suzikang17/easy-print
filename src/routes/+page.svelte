@@ -43,6 +43,23 @@
 
 	let themeClass = $derived(themes.find((t) => t.name === theme)?.cssClass ?? 'theme-modern');
 
+	// Auto-scale preview to fit pane width
+	let previewPaneEl: HTMLDivElement | undefined = $state();
+	let previewScale = $state(0.7);
+
+	$effect(() => {
+		if (!previewPaneEl) return;
+		const observer = new ResizeObserver((entries) => {
+			for (const entry of entries) {
+				const paneWidth = entry.contentRect.width - 32; // subtract padding
+				const scale = Math.min(1, paneWidth / layout.pageWidth);
+				previewScale = scale;
+			}
+		});
+		observer.observe(previewPaneEl);
+		return () => observer.disconnect();
+	});
+
 	function handlePrint() {
 		window.print();
 	}
@@ -72,8 +89,8 @@
 			<Editor value={content} onchange={(v) => (content = v)} />
 		</div>
 
-		<div class="preview-pane">
-			<div class="preview-scroll">
+		<div class="preview-pane" bind:this={previewPaneEl}>
+			<div class="preview-scroll" style="transform: scale({previewScale})">
 				{#if html}
 					<PagePreview {html} {layout} theme={themeClass} onmeasure={(h) => (measuredHeight = h)} />
 				{:else}
@@ -115,7 +132,6 @@
 
 	.preview-scroll {
 		transform-origin: top center;
-		transform: scale(0.7);
 	}
 
 	.empty-state {
