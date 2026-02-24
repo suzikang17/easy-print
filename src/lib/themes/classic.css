@@ -1,0 +1,16 @@
+.theme-classic {
+	--font-body: Georgia, 'Times New Roman', serif;
+	--font-heading: Georgia, 'Times New Roman', serif;
+	--font-size-base: 15px;
+	--font-size-h1: 24px;
+	--font-size-h2: 19px;
+	--line-height: 1.5;
+	--section-gap: 16px;
+	--heading-margin: 12px 0 6px;
+	--list-padding: 24px;
+	--hr-style: 1px solid #666;
+	--text-color: #222;
+	--bg-color: #fff;
+	--accent-color: #444;
+	--border-style: none;
+}
