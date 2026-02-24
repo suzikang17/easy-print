@@ -32,6 +32,20 @@ describe('parseContent', () => {
 		expect(sectionCount).toBe(2);
 	});
 
+	it('normalizes non-standard bullet characters to list items', () => {
+		const result = parseContent('■ item one\n■ item two');
+		expect(result).toContain('<li>item one</li>');
+		expect(result).toContain('<li>item two</li>');
+	});
+
+	it('normalizes nested non-standard bullets', () => {
+		const result = parseContent('- parent\n  ■ child');
+		expect(result).toContain('<li>parent');
+		expect(result).toContain('<li>child</li>');
+		// Should have a nested ul
+		expect(result).toContain('<ul>');
+	});
+
 	it('preserves single line breaks as <br>', () => {
 		const result = parseContent('line one\nline two\nline three');
 		expect(result).toContain('<br');
