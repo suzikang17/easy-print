@@ -1,3 +1,6 @@
+import { lyricsTemplate } from './lyrics';
+import { recipeTemplate } from './recipe';
+
 export interface Template {
 	name: string;
 	label: string;
@@ -8,7 +11,7 @@ export interface Template {
 
 export type TemplateName = 'none' | 'lyrics' | 'recipe';
 
-export const templates: Template[] = [];
+export const templates: Template[] = [lyricsTemplate, recipeTemplate];
 
 export function getTemplate(name: TemplateName): Template | undefined {
 	return templates.find((t) => t.name === name);

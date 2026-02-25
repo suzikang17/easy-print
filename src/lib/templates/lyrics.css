@@ -1,0 +1,19 @@
+.template-lyrics {
+	--font-size-h2: 14px;
+	--heading-margin: 12px 0 2px;
+	--section-gap: 4px;
+	--line-height: 1.35;
+}
+
+.template-lyrics h2 {
+	font-weight: 600;
+	font-style: italic;
+	opacity: 0.6;
+	text-transform: uppercase;
+	font-size: 11px;
+	letter-spacing: 0.05em;
+}
+
+.template-lyrics .section {
+	margin-bottom: 12px;
+}
