@@ -1,13 +1,16 @@
 <script lang="ts">
 	import { themes, type ThemeName } from '$lib/themes';
+	import { templates, type TemplateName } from '$lib/templates';
 
 	interface Props {
 		theme: ThemeName;
+		template: TemplateName;
 		maxPages: number;
 		orientation: 'portrait' | 'landscape';
 		paperSize: 'letter' | 'a4';
 		fontSizeOverride: string;
 		onthemechange: (theme: ThemeName) => void;
+		ontemplatechange: (template: TemplateName) => void;
 		onpageschange: (pages: number) => void;
 		onorientationchange: (orientation: 'portrait' | 'landscape') => void;
 		onpapersizechange: (size: 'letter' | 'a4') => void;
@@ -17,11 +20,13 @@
 
 	let {
 		theme,
+		template,
 		maxPages,
 		orientation,
 		paperSize,
 		fontSizeOverride,
 		onthemechange,
+		ontemplatechange,
 		onpageschange,
 		onorientationchange,
 		onpapersizechange,
@@ -38,6 +43,19 @@
 			onchange={(e) => onthemechange((e.target as HTMLSelectElement).value as ThemeName)}
 		>
 			{#each themes as t}
+				<option value={t.name}>{t.label}</option>
+			{/each}
+		</select>
+	</label>
+
+	<label class="toolbar-group">
+		<span class="toolbar-label">Template</span>
+		<select
+			value={template}
+			onchange={(e) => ontemplatechange((e.target as HTMLSelectElement).value as TemplateName)}
+		>
+			<option value="none">None</option>
+			{#each templates as t}
 				<option value={t.name}>{t.label}</option>
 			{/each}
 		</select>

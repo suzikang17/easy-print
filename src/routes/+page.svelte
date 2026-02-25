@@ -5,6 +5,7 @@
 	import { parseContent } from '$lib/parser';
 	import { computeLayout, type LayoutConfig } from '$lib/layout-engine';
 	import { themes, type ThemeName } from '$lib/themes';
+	import { getTemplate, type TemplateName } from '$lib/templates';
 
 	// State
 	let content = $state('');
@@ -13,9 +14,12 @@
 	let orientation: 'portrait' | 'landscape' = $state('portrait');
 	let paperSize: 'letter' | 'a4' = $state('letter');
 	let fontSizeOverride = $state('auto');
+	let template: TemplateName = $state('none');
 
 	// Derived
-	let html = $derived(parseContent(content));
+	let activeTemplate = $derived(getTemplate(template));
+	let html = $derived(parseContent(content, activeTemplate?.transform));
+	let templateClass = $derived(activeTemplate?.cssClass ?? '');
 
 	let pageDimensions = $derived.by(() => {
 		if (paperSize === 'letter') return { w: 816, h: 1056 };
@@ -72,11 +76,13 @@
 <div class="app no-print-wrapper">
 	<Toolbar
 		{theme}
+		{template}
 		{maxPages}
 		{orientation}
 		{paperSize}
 		{fontSizeOverride}
 		onthemechange={(t) => (theme = t)}
+		ontemplatechange={(t) => (template = t)}
 		onpageschange={(p) => (maxPages = p)}
 		onorientationchange={(o) => (orientation = o)}
 		onpapersizechange={(s) => (paperSize = s)}
@@ -92,7 +98,7 @@
 		<div class="preview-pane" bind:this={previewPaneEl}>
 			<div class="preview-scroll" style="transform: scale({previewScale})">
 				{#if html}
-					<PagePreview {html} {layout} theme={themeClass} onmeasure={(h) => (measuredHeight = h)} />
+					<PagePreview {html} {layout} theme="{themeClass} {templateClass}" onmeasure={(h) => (measuredHeight = h)} />
 				{:else}
 					<div class="empty-state">
 						<p>Type or paste content on the left to see a live preview.</p>
