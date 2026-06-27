@@ -28,6 +28,18 @@ export function computeLayout(contentHeight: number, config: LayoutConfig): Layo
 	const pageWidth = config.orientation === 'landscape' ? config.pageHeight : config.pageWidth;
 	const pageHeight = config.orientation === 'landscape' ? config.pageWidth : config.pageHeight;
 
+	// "Fit to content" mode (maxPages <= 0): don't cram. Keep a single column at a
+	// comfortable font and let the content flow across as many pages as it needs.
+	if (config.maxPages <= 0) {
+		return {
+			fontSize: config.fontSizeOverride ?? DEFAULT_FONT_SIZE,
+			columns: 1,
+			marginPx: DEFAULT_MARGIN,
+			pageWidth,
+			pageHeight,
+		};
+	}
+
 	const totalHeight = pageHeight * config.maxPages;
 
 	let fontSize = config.fontSizeOverride ?? DEFAULT_FONT_SIZE;

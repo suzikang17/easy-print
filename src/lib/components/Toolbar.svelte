@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { themes, type ThemeName } from '$lib/themes';
-	import { templates, type TemplateName } from '$lib/templates';
+	import { templates, blogStyles, type TemplateName, type BlogStyle } from '$lib/templates';
 
 	interface Props {
 		theme: ThemeName;
 		template: TemplateName;
+		blogStyle: BlogStyle;
 		maxPages: number;
 		orientation: 'portrait' | 'landscape';
-		paperSize: 'letter' | 'a4';
 		fontSizeOverride: string;
 		onthemechange: (theme: ThemeName) => void;
 		ontemplatechange: (template: TemplateName) => void;
+		onblogstylechange: (style: BlogStyle) => void;
 		onpageschange: (pages: number) => void;
 		onorientationchange: (orientation: 'portrait' | 'landscape') => void;
-		onpapersizechange: (size: 'letter' | 'a4') => void;
 		onfontsizechange: (size: string) => void;
 		onprint: () => void;
 	}
@@ -21,15 +21,15 @@
 	let {
 		theme,
 		template,
+		blogStyle,
 		maxPages,
 		orientation,
-		paperSize,
 		fontSizeOverride,
 		onthemechange,
 		ontemplatechange,
+		onblogstylechange,
 		onpageschange,
 		onorientationchange,
-		onpapersizechange,
 		onfontsizechange,
 		onprint,
 	}: Props = $props();
@@ -61,6 +61,20 @@
 		</select>
 	</label>
 
+	{#if template === 'blogpost'}
+		<label class="toolbar-group">
+			<span class="toolbar-label">Style</span>
+			<select
+				value={blogStyle}
+				onchange={(e) => onblogstylechange((e.target as HTMLSelectElement).value as BlogStyle)}
+			>
+				{#each blogStyles as s}
+					<option value={s.name}>{s.label}</option>
+				{/each}
+			</select>
+		</label>
+	{/if}
+
 	<label class="toolbar-group">
 		<span class="toolbar-label">Pages</span>
 		<select
@@ -69,6 +83,7 @@
 		>
 			<option value={1}>1 page</option>
 			<option value={2}>2 pages</option>
+			<option value={0}>Fit to content</option>
 		</select>
 	</label>
 
@@ -83,18 +98,6 @@
 		>
 			<option value="portrait">Portrait</option>
 			<option value="landscape">Landscape</option>
-		</select>
-	</label>
-
-	<label class="toolbar-group">
-		<span class="toolbar-label">Paper</span>
-		<select
-			value={paperSize}
-			onchange={(e) =>
-				onpapersizechange((e.target as HTMLSelectElement).value as 'letter' | 'a4')}
-		>
-			<option value="letter">Letter</option>
-			<option value="a4">A4</option>
 		</select>
 	</label>
 

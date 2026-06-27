@@ -1,0 +1,152 @@
+/*
+ * Blog Post house style: editorial typography for long-form articles.
+ * Inherits the shared core from base.css; only blog-specific bits live here.
+ */
+.template-blogpost {
+	--p-gap: 13px;
+	--line-height: 1.65;
+	--section-gap: 0;
+	--heading-margin: 24px 0 8px;
+	--font-size-h1: 28px;
+	--font-size-h2: 18px;
+}
+
+/* Read as one continuous column of prose — not bordered section cards. */
+.template-blogpost .section {
+	border-left: none !important;
+	padding-left: 0 !important;
+	margin-bottom: 0 !important;
+}
+
+.template-blogpost h1 {
+	line-height: 1.15;
+	margin: 0 0 4px;
+}
+
+/* Date / byline directly under the title. */
+.template-blogpost .byline {
+	color: #888;
+	font-size: 0.85em;
+	margin: 0 0 18px;
+}
+
+.template-blogpost h2 {
+	border-bottom: 1px solid #eee;
+	padding-bottom: 4px;
+	margin: 24px 0 10px;
+}
+
+/* ============================================================
+   Reading layouts (switchable via the Style dropdown).
+   Each narrows the line measure to ~50–70 chars, which is the
+   biggest readability win on paper.
+   ============================================================ */
+
+/* --- Classic Essay: book-style serif, justified, indented paras --- */
+.blog-classic .page-content {
+	font-family: Georgia, 'Times New Roman', serif;
+	/* Healthy book margins: a ~6in measure centered on the page leaves
+	   comfortable whitespace on both sides (on top of the page/@page margins). */
+	max-width: 6in;
+	margin: 0 auto;
+	padding: 0.25in 0;
+	text-align: justify;
+	hyphens: auto;
+	line-height: 1.55;
+}
+
+.blog-classic p {
+	margin: 0;
+	text-indent: 1.4em;
+}
+
+/* First paragraph of a section (and the byline) shouldn't be indented. */
+.blog-classic h1 + p,
+.blog-classic h2 + p,
+.blog-classic .byline,
+.blog-classic .byline + p {
+	text-indent: 0;
+}
+
+.blog-classic h1 {
+	text-align: center;
+}
+
+.blog-classic .byline {
+	text-align: center;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+}
+
+/* --- Two-Column: periodical layout, ~40% fewer pages --- */
+.blog-twocol .page-content {
+	font-family: Georgia, 'Times New Roman', serif;
+	column-count: 2;
+	column-gap: 0.4in;
+	font-size: 14px;
+	line-height: 1.45;
+	text-align: justify;
+	hyphens: auto;
+}
+
+/* Dissolve the section wrappers so paragraphs flow freely between columns
+   (a wrapped section with break-inside:avoid jams everything into column 1)
+   and so column-span on the title/headings actually takes effect. */
+.blog-twocol .section {
+	display: contents;
+}
+
+.blog-twocol p {
+	margin: 0 0 8px;
+}
+
+/* Title, byline and section headings span both columns. */
+.blog-twocol h1,
+.blog-twocol .byline,
+.blog-twocol h2 {
+	column-span: all;
+}
+
+/* --- Cornell Notes: blank cue column on the left, article on the right,
+   summary box at the bottom — a study/markup layout. --- */
+.blog-cornell .page-content {
+	position: relative;
+	font-family: Georgia, 'Times New Roman', serif;
+	margin-left: 2in;
+	padding-left: 0.3in;
+	border-left: 1.5px solid #b8b8b8;
+	line-height: 1.6;
+	max-width: none;
+}
+
+/* The blank left margin is the cue column; a faint label hints at its use. */
+.blog-cornell .page-content::before {
+	content: 'Cues';
+	position: absolute;
+	left: 0;
+	transform: translateX(-2in);
+	font-size: 10px;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	color: #bbb;
+}
+
+/* Summary box spanning the full width at the very end. */
+.blog-cornell .page-content::after {
+	content: 'Summary';
+	display: block;
+	margin-left: calc(-2in - 0.3in);
+	margin-top: 28px;
+	padding: 8px 10px;
+	min-height: 1.1in;
+	border: 1.5px solid #b8b8b8;
+	font-size: 10px;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	color: #bbb;
+	break-inside: avoid;
+}
+
+.blog-cornell p {
+	margin: 0 0 12px;
+}

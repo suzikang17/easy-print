@@ -18,6 +18,8 @@
 		"@sveltejs/vite-plugin-svelte": "^6.2.4",
 		"@testing-library/jest-dom": "^6.9.1",
 		"@testing-library/svelte": "^5.3.1",
+		"@types/jsdom": "^28.0.3",
+		"@types/turndown": "^5.0.6",
 		"jsdom": "^28.1.0",
 		"svelte": "^5.51.0",
 		"svelte-check": "^4.3.6",
@@ -26,6 +28,9 @@
 		"vitest": "^4.0.18"
 	},
 	"dependencies": {
-		"marked": "^17.0.3"
+		"@mozilla/readability": "^0.6.0",
+		"marked": "^17.0.3",
+		"pagedjs": "^0.4.3",
+		"turndown": "^7.2.4"
 	}
 }

@@ -63,7 +63,37 @@ body {
 	break-inside: avoid;
 }
 
-/* Print styles */
+/* Manual page break (from a "[newpage]" line). */
+.page-break {
+	break-before: page;
+}
+
+/* On screen, show it as a labelled dashed divider so the user sees the split. */
+@media screen {
+	.page-break {
+		position: relative;
+		height: 0;
+		margin: 28px 0;
+		border-top: 2px dashed #cbd5e1;
+	}
+
+	.page-break::after {
+		content: 'Page break';
+		position: absolute;
+		top: -9px;
+		left: 50%;
+		transform: translateX(-50%);
+		padding: 0 8px;
+		background: #fff;
+		font-size: 10px;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: #94a3b8;
+	}
+}
+
+/* Print styles. @page rules (size, margins, header/footer) are supplied by
+   Paged.js via the pageCss the app builds — see PagePreview. */
 @media print {
 	body {
 		background: white !important;
@@ -79,5 +109,8 @@ body {
 		box-shadow: none !important;
 		margin: 0 !important;
 		border-radius: 0 !important;
+		/* Margins now come from @page; let content flow its natural height. */
+		padding: 0 !important;
+		min-height: 0 !important;
 	}
 }

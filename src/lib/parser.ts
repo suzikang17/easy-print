@@ -23,10 +23,16 @@ export function parseContent(
 		processed = transform(processed);
 	}
 
+	// A lone "[newpage]" line becomes a hard page break.
+	processed = processed.replace(
+		/^[^\S\n]*\[newpage\][^\S\n]*$/gim,
+		'\n\n<div class="page-break"></div>\n\n'
+	);
+
 	const rawHtml = marked.parse(processed, { async: false, breaks: true }) as string;
 
-	// Split HTML at h1/h2 boundaries and wrap each in a section div
-	const sections = rawHtml.split(/(?=<h[12][\s>])/);
+	// Split HTML at h1/h2 boundaries (and hard page breaks) into section divs.
+	const sections = rawHtml.split(/(?=<h[12][\s>])|(?=<div class="page-break")/);
 
 	if (sections.length <= 1) {
 		return rawHtml;

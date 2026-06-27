@@ -1,0 +1,67 @@
+/*
+ * Shared core styling inherited by EVERY template (applied via the
+ * `template-base` class alongside each template's own class). This is the
+ * unified house style: common typographic DNA — vertical rhythm, heading
+ * weight, lists, quotes, links — so a recipe and a blog post feel like the
+ * same product. Individual templates override only what's specific to them.
+ *
+ * Cascade order (see +layout.svelte): app.css -> themes -> base.css -> template.
+ */
+.template-base {
+	--p-gap: 10px;
+}
+
+/* Vertical rhythm: consistent paragraph spacing, no stray top margin. */
+.template-base p {
+	margin: 0 0 var(--p-gap);
+}
+
+.template-base > :first-child,
+.template-base .section > :first-child {
+	margin-top: 0;
+}
+
+/* Headings: shared weight + tight leading regardless of theme. */
+.template-base h1,
+.template-base h2,
+.template-base h3 {
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+/* Lists. */
+.template-base ul,
+.template-base ol {
+	margin: 0 0 var(--p-gap);
+}
+
+.template-base li {
+	margin: 2px 0;
+}
+
+/* Block quotes. */
+.template-base blockquote {
+	margin: 12px 0;
+	padding-left: 14px;
+	border-left: 3px solid #ddd;
+	color: #555;
+	font-style: italic;
+}
+
+/* Links: dark + underlined so they stay legible in print. */
+.template-base a {
+	color: var(--accent-color, #1a56db);
+	text-decoration: underline;
+}
+
+.template-base strong {
+	font-weight: 700;
+}
+
+.template-base em {
+	font-style: italic;
+}
+
+.template-base hr {
+	margin: 12px 0;
+}
