@@ -78,6 +78,158 @@
 	// keep the portrait scale and overflow the pane.
 	let previewScale = $derived(paneWidth > 0 ? Math.min(1, paneWidth / layout.pageWidth) : 0.7);
 
+	// Proportional two-way scroll sync between the editor and the preview.
+	$effect(() => {
+		const editor = document.getElementById('content-input');
+		const preview = previewPaneEl;
+		if (!editor || !preview) return;
+		let lock: string | null = null;
+		let release: ReturnType<typeof setTimeout>;
+		const sync = (src: HTMLElement, dst: HTMLElement, who: string) => {
+			if (lock && lock !== who) return; // ignore the echo from our own scroll
+			const srcMax = src.scrollHeight - src.clientHeight;
+			const dstMax = dst.scrollHeight - dst.clientHeight;
+			if (srcMax <= 0 || dstMax <= 0) return;
+			lock = who;
+			dst.scrollTop = (src.scrollTop / srcMax) * dstMax;
+			clearTimeout(release);
+			release = setTimeout(() => (lock = null), 90);
+		};
+		const onEditor = () => sync(editor, preview, 'editor');
+		const onPreview = () => sync(preview, editor, 'preview');
+		editor.addEventListener('scroll', onEditor, { passive: true });
+		preview.addEventListener('scroll', onPreview, { passive: true });
+		return () => {
+			editor.removeEventListener('scroll', onEditor);
+			preview.removeEventListener('scroll', onPreview);
+		};
+	});
+
+	// Whitespace-insensitive search for `target` across an element's text nodes;
+	// returns a DOM Range spanning the match (or null).
+	function findRangeInElement(container: HTMLElement, target: string): Range | null {
+		const want = target.replace(/\s+/g, ' ').trim();
+		if (want.length < 2) return null;
+		const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+		let norm = '';
+		const map: { node: Node; offset: number }[] = [];
+		let prevSpace = true;
+		let n: Node | null;
+		while ((n = walker.nextNode())) {
+			const t = n.nodeValue ?? '';
+			for (let i = 0; i < t.length; i++) {
+				if (/\s/.test(t[i])) {
+					if (prevSpace) continue;
+					norm += ' ';
+					map.push({ node: n, offset: i });
+					prevSpace = true;
+				} else {
+					norm += t[i];
+					map.push({ node: n, offset: i });
+					prevSpace = false;
+				}
+			}
+		}
+		const idx = norm.indexOf(want);
+		if (idx < 0) return null;
+		const start = map[idx];
+		const end = map[idx + want.length - 1];
+		if (!start || !end) return null;
+		const range = document.createRange();
+		range.setStart(start.node, start.offset);
+		range.setEnd(end.node, end.offset + 1);
+		return range;
+	}
+
+	// Whitespace-insensitive search returning raw start/end offsets in `haystack`.
+	function findTextOffsets(haystack: string, needle: string): { start: number; end: number } | null {
+		const want = needle.replace(/\s+/g, ' ').trim();
+		if (want.length < 2) return null;
+		let norm = '';
+		const map: number[] = [];
+		let prevSpace = true;
+		for (let i = 0; i < haystack.length; i++) {
+			if (/\s/.test(haystack[i])) {
+				if (prevSpace) continue;
+				norm += ' ';
+				map.push(i);
+				prevSpace = true;
+			} else {
+				norm += haystack[i];
+				map.push(i);
+				prevSpace = false;
+			}
+		}
+		const idx = norm.indexOf(want);
+		if (idx < 0) return null;
+		return { start: map[idx], end: map[idx + want.length - 1] + 1 };
+	}
+
+	// Mirror a text selection between editor and preview (best-effort text match).
+	$effect(() => {
+		const editor = document.getElementById('content-input') as HTMLTextAreaElement | null;
+		const preview = previewPaneEl;
+		if (!editor || !preview) return;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const highlights = (CSS as any).highlights;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const HL = (window as any).Highlight;
+		if (!highlights || !HL) return; // Custom Highlight API unavailable
+
+		let lock: string | null = null;
+		let release: ReturnType<typeof setTimeout>;
+		const setLock = (w: string) => {
+			lock = w;
+			clearTimeout(release);
+			release = setTimeout(() => (lock = null), 150);
+		};
+		const clearHi = () => highlights.delete('mirror');
+		// Drop markdown syntax so the source selection matches the rendered text.
+		const stripMd = (s: string) =>
+			s.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[#*_`~>]/g, '');
+
+		const onEditorSelect = () => {
+			if (lock && lock !== 'editor') return;
+			const sel = editor.value.slice(editor.selectionStart, editor.selectionEnd);
+			const q = stripMd(sel);
+			if (q.replace(/\s+/g, ' ').trim().length < 2) {
+				clearHi();
+				return;
+			}
+			const range = findRangeInElement(preview, q);
+			if (range) {
+				setLock('editor');
+				highlights.set('mirror', new HL(range));
+				(range.startContainer.parentElement as HTMLElement | null)?.scrollIntoView?.({
+					block: 'nearest'
+				});
+			} else {
+				clearHi();
+			}
+		};
+
+		const onPreviewMouseUp = () => {
+			const s = document.getSelection();
+			if (!s || s.isCollapsed || !preview.contains(s.anchorNode)) return;
+			if (s.toString().replace(/\s+/g, ' ').trim().length < 2) return;
+			const off = findTextOffsets(editor.value, s.toString());
+			if (!off) return;
+			setLock('preview');
+			if (s.rangeCount) highlights.set('mirror', new HL(s.getRangeAt(0).cloneRange()));
+			editor.focus();
+			editor.setSelectionRange(off.start, off.end);
+			setLock('preview');
+		};
+
+		editor.addEventListener('select', onEditorSelect);
+		preview.addEventListener('mouseup', onPreviewMouseUp);
+		return () => {
+			editor.removeEventListener('select', onEditorSelect);
+			preview.removeEventListener('mouseup', onPreviewMouseUp);
+			clearHi();
+		};
+	});
+
 	// --- Print header / footer ---
 	let headerText = $state('');
 	let footerText = $state('');
@@ -107,6 +259,13 @@
 
 	// --- Page-thumbnail minimap (like a code-editor minimap) ---
 	let minimapEl: HTMLElement | undefined = $state();
+	// Page indices the user has excluded from printing (survives re-renders).
+	const excludedPages = new Set<number>();
+
+	function setExcluded(page: HTMLElement, item: HTMLElement, excluded: boolean) {
+		page.classList.toggle('page-excluded', excluded);
+		item.classList.toggle('thumb-excluded', excluded);
+	}
 
 	function buildMinimap(pagesRoot: HTMLDivElement) {
 		if (!minimapEl) return;
@@ -114,11 +273,14 @@
 		const scale = 104 / layout.pageWidth;
 		minimapEl.innerHTML = '';
 		pages.forEach((pg, i) => {
+			const item = document.createElement('div');
+			item.className = 'minimap-item';
+
 			const thumb = document.createElement('button');
 			thumb.className = 'minimap-thumb';
 			thumb.style.width = `${layout.pageWidth * scale}px`;
 			thumb.style.height = `${layout.pageHeight * scale}px`;
-			thumb.title = `Page ${i + 1}`;
+			thumb.title = `Page ${i + 1} — click to jump`;
 
 			const inner = document.createElement('div');
 			inner.className = 'minimap-scale';
@@ -133,7 +295,25 @@
 			thumb.appendChild(num);
 
 			thumb.onclick = () => pages[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
-			minimapEl!.appendChild(thumb);
+
+			// Include-in-print checkbox (top-left of the thumbnail).
+			const cb = document.createElement('input');
+			cb.type = 'checkbox';
+			cb.className = 'minimap-include';
+			cb.checked = !excludedPages.has(i);
+			cb.title = 'Include this page in the print';
+			cb.onchange = () => {
+				if (cb.checked) excludedPages.delete(i);
+				else excludedPages.add(i);
+				setExcluded(pages[i], item, !cb.checked);
+			};
+
+			item.appendChild(thumb);
+			item.appendChild(cb);
+			minimapEl!.appendChild(item);
+
+			// Re-apply any prior exclusion to the freshly rendered page.
+			setExcluded(pages[i], item, excludedPages.has(i));
 		});
 	}
 </script>
@@ -289,6 +469,12 @@
 		border-left: 1px solid #e2e8f0;
 	}
 
+	.minimap :global(.minimap-item) {
+		position: relative;
+		flex: 0 0 auto;
+		line-height: 0;
+	}
+
 	.minimap :global(.minimap-thumb) {
 		position: relative;
 		padding: 0;
@@ -297,7 +483,38 @@
 		cursor: pointer;
 		overflow: hidden;
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-		flex: 0 0 auto;
+		display: block;
+	}
+
+	/* Include-in-print checkbox, top-left of each thumbnail. */
+	.minimap :global(.minimap-include) {
+		position: absolute;
+		top: 4px;
+		left: 4px;
+		margin: 0;
+		cursor: pointer;
+		z-index: 1;
+	}
+
+	/* Excluded pages: dimmed thumbnail with a strike. */
+	.minimap :global(.thumb-excluded .minimap-thumb) {
+		opacity: 0.35;
+	}
+
+	.minimap :global(.thumb-excluded::after) {
+		content: 'Excluded';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%) rotate(-12deg);
+		font: 600 10px sans-serif;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: #dc2626;
+		background: rgba(255, 255, 255, 0.9);
+		padding: 1px 5px;
+		border-radius: 3px;
+		pointer-events: none;
 	}
 
 	.minimap :global(.minimap-thumb:hover) {
@@ -359,6 +576,11 @@
 
 		.preview-scroll {
 			transform: none !important;
+		}
+
+		/* Pages the user unchecked in the minimap don't print. */
+		:global(.pagedjs_page.page-excluded) {
+			display: none !important;
 		}
 	}
 </style>

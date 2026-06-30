@@ -11,6 +11,12 @@ body {
 	color: #1a1a1a;
 }
 
+/* Editor<->preview selection mirroring (Custom Highlight API). */
+::highlight(mirror) {
+	background-color: #fde047;
+	color: #1a1a1a;
+}
+
 /* Page container base styles consumed by theme variables */
 .page {
 	font-family: var(--font-body, system-ui, sans-serif);
